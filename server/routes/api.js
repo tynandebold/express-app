@@ -1,16 +1,43 @@
 import { Router } from 'express';
+import path from 'path';
 import fs from 'fs';
+import Datastore from 'nedb';
 
-const data = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
+const db = new Datastore({
+  filename: path.join(__dirname, '../data.db'),
+  autoload: true
+});
+
 const router = Router();
+
+router.get('/migrate/', (req, res) => {
+  const data = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
+
+  db.insert(data, function (err, newDoc) {
+    if(err) {
+      res.json({
+        ok: false,
+        err
+      });
+    }
+    res.json({
+      ok: true,
+      newDoc
+    });
+  });
+});
 
 router.get('/countries/', (req, res) => res.json(data));
 
 router.get('/country/:country', (req, res) => {
-    const country = req.params.country;
-    const queryResult = data.filter(place => place.country == country);
+  const country = req.params.country;
 
-    res.json(queryResult);
+  db.find({ country }, function (err, docs) {
+    res.json({
+      ok: true,
+      docs
+    });
+  });
 });
 
 router.get('/group/:group', (req, res) => {
