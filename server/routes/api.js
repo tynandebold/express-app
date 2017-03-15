@@ -69,7 +69,7 @@ router.get('/group/:group', (req, res) => {
       queryResult = docs.filter(place => place.continent == group);
     } else if (subjects.indexOf(group) > -1) {
       queryResult = docs.filter(place => place.subject == group);
-    } else if (subjects.indexOf(group) == -1) {
+    } else if (continents.indexOf(group) == -1 || subjects.indexOf(group) == -1) {
       queryResult = 'no matching results';
     }
 
