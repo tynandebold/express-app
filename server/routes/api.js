@@ -3,15 +3,19 @@ import path from 'path';
 import fs from 'fs';
 import Datastore from 'nedb';
 
+const dbFilepath = path.join(__dirname, '../data.db')
+
 const db = new Datastore({
-  filename: path.join(__dirname, '../data.db'),
+  filename: dbFilepath,
   autoload: true
 });
 
 const router = Router();
 
 router.get('/migrate/', (req, res) => {
-  const data = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
+  fs.truncateSync(dbFilepath, 0);
+
+  const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../../data/seed.json'), 'utf-8'));
 
   db.insert(data, function (err, newDoc) {
     if(err) {
