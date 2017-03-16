@@ -17,7 +17,7 @@ router.get('/migrate/', (req, res) => {
 
   const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../../data/seed.json'), 'utf-8'));
 
-  db.insert(data, function (err, newDoc) {
+  db.insert(data, (err, newDoc) => {
     if(err) {
       res.json({
         ok: false,
@@ -31,12 +31,24 @@ router.get('/migrate/', (req, res) => {
   });
 });
 
-router.get('/countries/', (req, res) => res.json(data));
+router.get('/countries/', (req, res) => {
+  const reqFields = ['country', 'continent'];
 
-router.get('/country/:country', (req, res) => {
+  const payload = req.body;
+  const field = Object.keys(payload);
+
+  db.find({}, (err, docs) => {
+    res.json({
+      ok: true,
+      docs
+    });
+  });
+});
+
+router.get('/countries/:country', (req, res) => {
   const country = req.params.country;
 
-  db.find({ country }, function (err, docs) {
+  db.find({ country }, (err, docs) => {
     res.json({
       ok: true,
       docs
