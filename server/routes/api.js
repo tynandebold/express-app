@@ -32,12 +32,7 @@ router.get('/migrate/', (req, res) => {
 });
 
 router.get('/countries/', (req, res) => {
-  const reqFields = ['country', 'continent'];
-
-  const payload = req.body;
-  const field = Object.keys(payload);
-
-  db.find({}, (err, docs) => {
+  db.find({}, function (err, docs) {
     res.json({
       ok: true,
       docs
@@ -57,26 +52,32 @@ router.get('/countries/:country', (req, res) => {
 });
 
 router.get('/group/:group', (req, res) => {
-    const group = req.params.group;
-    let queryResult;
+  const group = req.params.group;
+  let queryResult;
 
-    const continents = data
+  db.find({}, function (err, docs) {
+
+    const continents = docs
       .map((obj) => obj.continent)
       .filter((item, index, inputArray) => inputArray.indexOf(item) == index);
 
-    const subjects = data
+    const subjects = docs
       .map((obj) => obj.subject)
       .filter((item, index, inputArray) => inputArray.indexOf(item) == index);
 
     if (continents.indexOf(group) > -1) {
-      queryResult = data.filter(place => place.continent == group);
+      queryResult = docs.filter(place => place.continent == group);
+    } else if (subjects.indexOf(group) > -1) {
+      queryResult = docs.filter(place => place.subject == group);
+    } else if (continents.indexOf(group) == -1 || subjects.indexOf(group) == -1) {
+      queryResult = 'no matching results';
     }
 
-    if (subjects.indexOf(group) > -1) {
-      queryResult = data.filter(place => place.subject == group);
-    }
-
-    res.json(queryResult);
+    res.json({
+      ok: true,
+      queryResult
+    });
+  });
 });
 
 export default router;
